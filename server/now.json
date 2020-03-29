@@ -1,0 +1,15 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "index.js",
+        "use": "@now/node"
+      }
+    ],
+    "routes": [
+      { "src": "/.*", "dest": "index.js" }
+    ],
+    "env": {
+      "meower_db_atlas": "@meower_db_atlas"
+    }
+  }
