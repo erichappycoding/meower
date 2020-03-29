@@ -1,7 +1,7 @@
 const form = document.querySelector('form');            //load element by using element id
 const loadingElement = document.querySelector('.loading');
 const mewsElement = document.querySelector('.mews');    //load element by using .class name
-const API_URL = 'http://localhost:5000/mews';
+const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:5000/mews' : 'https://meower.erichappycoding.now.sh/mews';
 
 loadingElement.style.display = 'none';
 listMews();

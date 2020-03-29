@@ -18,9 +18,10 @@
   },
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "_comment_build": "node index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Eric Nguyen",
   "license": "ISC"
 }

@@ -8,7 +8,8 @@ require('dotenv').config();     //load variable from .env file
 //Create an express application
 const app = express();
 
-const db = monk(process.env.meower_db_connection, { useNewUrlParser: true });    //'localhost/meower'  connect to local mongodb server and meower database. Db will automatically be created if not existed.
+// const db = monk(process.env.meower_db_atlas || process.env.meower_db_local, { useNewUrlParser: true });    //connect to mongodb server and meower database. Db will automatically be created if not existed.
+const db = monk(process.env.meower_db_atlas, { useNewUrlParser: true });
 db.then(() => {
     console.log('Connected to Atlas MongoDB / meower database!');
 });
@@ -23,32 +24,19 @@ app.use(express.json());    //to parse json object sent from client e.g. request
 
 //Start listening for client requests
 app.listen(5000, ()=> {
-    console.log('Listening on http://localhost:5000');
+    console.log('Listening on http://<server_name>:5000');
 });
-
-// START - EXPRESS-RATE LIMIT //
-// Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
-// see https://expressjs.com/en/guide/behind-proxies.html
-// app.set('trust proxy', 1);
-
-const limiter = rateLimit({
-    windowMs: 30 * 1000, // 30 seconds
-    max: 10 // limit each IP to 100 requests per windowMs
-});
-   
-//  apply to all requests
-app.use(limiter);
-// END - EXPRESS-RATE LIMIT //
 
 app.get('/', (request, response) => {
     response.json({
-        message : 'Meower! :)'
+        message : 'Meower! :)',
+        mews: mews.find({})
     });
 });
 
 //return 5 latest mews to the client, order by 'created' descending
 app.get('/mews', (req, res) =>{
-
+    
     mews
     .find({}, {limit: itemsPerPage, sort: {created: -1}}, function (error, result) {
         if(error) {
@@ -57,9 +45,25 @@ app.get('/mews', (req, res) =>{
             res.json({message: 'Error occured when at when filtering mews.'});
         }
         else
-            res.json(result);
+        res.json(result);
     });
 });
+
+
+// START - EXPRESS-RATE LIMIT //
+// Enable if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
+// see https://expressjs.com/en/guide/behind-proxies.html
+// app.set('trust proxy', 1);
+
+//** MOVE rateLimit here so that it counts for post requests only */
+const limiter = rateLimit({
+    windowMs: 30 * 1000, // 30 seconds
+    max: 10 // limit each IP to 100 requests per windowMs
+});
+
+//  apply to post requests
+app.use(limiter);
+// END - EXPRESS-RATE LIMIT //
 
 app.post('/mews', (req, res) => {
     if(isValidMew(req.body)){
